@@ -1,1 +1,1 @@
-hi, my nameS
+hi, my name

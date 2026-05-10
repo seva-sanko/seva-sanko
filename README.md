@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="header.gif" width="100%" alt="rule 59350005 — von Neumann cellular automaton" />
+  <img src="ssv.gif" width="100%" alt="rule 59350005 — von Neumann cellular automaton" />
 </div>
 
 ```bash

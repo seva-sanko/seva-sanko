@@ -107,7 +107,7 @@ for i in range(1, 600):
 
 if not found_cycle:
     # ping-pong: letters dissolve → reform, seamless loop
-    half = 40
+    half = 36
     fwd = history[:half]
     back = history[half-2:0:-1]
     frames_data = fwd + back
@@ -117,7 +117,7 @@ print(f"frames: {len(frames_data)}")
 
 frames = [to_image(f) for f in frames_data]
 
-HOLD_MS = 2000  # pause on letters at start and end of each loop
+HOLD_MS = 3000  # pause on letters at start and end of each loop
 durations = [HOLD_MS] + [FRAME_DURATION] * (len(frames) - 2) + [HOLD_MS]
 
 out = "ca.gif"

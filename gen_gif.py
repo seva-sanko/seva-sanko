@@ -117,10 +117,13 @@ print(f"frames: {len(frames_data)}")
 
 frames = [to_image(f) for f in frames_data]
 
+HOLD_MS = 2000  # pause on letters at start and end of each loop
+durations = [HOLD_MS] + [FRAME_DURATION] * (len(frames) - 2) + [HOLD_MS]
+
 out = "ca.gif"
 frames[0].save(
     out, save_all=True, append_images=frames[1:],
-    optimize=True, duration=FRAME_DURATION, loop=0
+    optimize=True, duration=durations, loop=0
 )
 size_kb = __import__("os").path.getsize(out) // 1024
 print(f"saved {out}: {GRID_W*CELL_SIZE}x{GRID_H*CELL_SIZE}px, {len(frames)} frames, {size_kb}KB")

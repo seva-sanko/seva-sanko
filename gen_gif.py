@@ -6,11 +6,45 @@ RULE_N = 59350005
 GRID_W = 150
 GRID_H = 45
 CELL_SIZE = 5
-FRAME_DURATION = 80
+FRAME_DURATION = 100
 
 BG   = (255, 255, 255)
 CELL = (0,   0,   0)
-GAP  = 0
+
+FONT_5x7 = {
+    'V': [
+        [1,0,0,0,1],
+        [1,0,0,0,1],
+        [1,0,0,0,1],
+        [0,1,0,1,0],
+        [0,1,0,1,0],
+        [0,0,1,0,0],
+        [0,0,1,0,0],
+    ],
+    'S': [
+        [0,1,1,1,0],
+        [1,0,0,0,1],
+        [1,0,0,0,0],
+        [0,1,1,1,0],
+        [0,0,0,0,1],
+        [1,0,0,0,1],
+        [0,1,1,1,0],
+    ],
+}
+
+SCALE = 5   # each font pixel -> SCALE cells
+
+def draw_char(grid, char, ox, oy):
+    bitmap = FONT_5x7[char]
+    for row, line in enumerate(bitmap):
+        for col, bit in enumerate(line):
+            if bit:
+                for dy in range(SCALE):
+                    for dx in range(SCALE):
+                        y = oy + row * SCALE + dy
+                        x = ox + col * SCALE + dx
+                        if 0 <= y < grid.shape[0] and 0 <= x < grid.shape[1]:
+                            grid[y, x] = 1
 
 def make_rules(n):
     b = bin(n)[2:].zfill(32)
@@ -29,51 +63,56 @@ def grid_hash(g):
 
 def to_image(grid):
     h, w = grid.shape
-    img_w = w * CELL_SIZE
-    img_h = h * CELL_SIZE
-    img = Image.new("RGB", (img_w, img_h), BG)
+    img = Image.new("RGB", (w * CELL_SIZE, h * CELL_SIZE), BG)
     pix = img.load()
     ys, xs = np.where(grid == 1)
     for y, x in zip(ys, xs):
-        x0 = x * CELL_SIZE + GAP
-        y0 = y * CELL_SIZE + GAP
-        x1 = x0 + CELL_SIZE - GAP
-        y1 = y0 + CELL_SIZE - GAP
-        for dy in range(y1 - y0):
-            for dx in range(x1 - x0):
-                pix[x0 + dx, y0 + dy] = CELL
+        for dy in range(CELL_SIZE):
+            for dx in range(CELL_SIZE):
+                pix[x * CELL_SIZE + dx, y * CELL_SIZE + dy] = CELL
     return img
 
 rules = make_rules(RULE_N)
 
-# dots_grid spacing=4 → period 45, seamless loop
+# draw "VS" centered on grid
+char_w = 5 * SCALE   # 25 cells wide
+char_h = 7 * SCALE   # 35 cells tall
+gap    = 5
+total_w = char_w * 2 + gap
+ox = (GRID_W - total_w) // 2
+oy = (GRID_H - char_h) // 2
+
 grid = np.zeros((GRID_H, GRID_W), dtype=np.uint8)
-for y in range(0, GRID_H, 4):
-    for x in range(0, GRID_W, 4):
-        grid[y, x] = 1
+draw_char(grid, 'V', ox, oy)
+draw_char(grid, 'S', ox + char_w + gap, oy)
 
+# try to find cycle (run up to 600 steps)
 g = grid.copy()
-
-# detect cycle
 seen = {}
-history = []
-for i in range(1000):
+history = [g.copy()]
+found_cycle = False
+for i in range(1, 600):
     h = grid_hash(g)
     if h in seen:
         start = seen[h]
         period = i - start
-        print(f"cycle: period={period}, starts at frame {start}")
-        frames_data = history[start:]
+        print(f"cycle: period={period}, start={start}")
+        frames_data = history[start:start + period]
+        found_cycle = True
         break
     seen[h] = i
-    history.append(g.copy())
     g = step(g, rules)
-else:
-    print("no cycle found, using first 60 frames")
-    frames_data = history[:60]
-    period = 60
+    history.append(g.copy())
 
-print(f"GIF frames: {len(frames_data)}")
+if not found_cycle:
+    # ping-pong: letters dissolve → reform, seamless loop
+    half = 40
+    fwd = history[:half]
+    back = history[half-2:0:-1]
+    frames_data = fwd + back
+    print(f"ping-pong: {half} fwd + {len(back)} back")
+
+print(f"frames: {len(frames_data)}")
 
 frames = [to_image(f) for f in frames_data]
 

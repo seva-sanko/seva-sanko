@@ -117,7 +117,7 @@ print(f"frames: {len(frames_data)}")
 
 frames = [to_image(f) for f in frames_data]
 
-HOLD_MS = 3000  # pause on letters at start and end of each loop
+HOLD_MS = 1000  # pause on letters at start and end of each loop
 durations = [HOLD_MS] + [FRAME_DURATION] * (len(frames) - 2) + [HOLD_MS]
 
 out = "ca.gif"

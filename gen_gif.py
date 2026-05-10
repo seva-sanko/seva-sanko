@@ -74,17 +74,18 @@ def to_image(grid):
 
 rules = make_rules(RULE_N)
 
-# draw "VS" centered on grid
+# draw "SSV" centered on grid
 char_w = 5 * SCALE   # 25 cells wide
 char_h = 7 * SCALE   # 35 cells tall
-gap    = 5
-total_w = char_w * 2 + gap
+gap    = 4
+total_w = char_w * 3 + gap * 2
 ox = (GRID_W - total_w) // 2
 oy = (GRID_H - char_h) // 2
 
 grid = np.zeros((GRID_H, GRID_W), dtype=np.uint8)
-draw_char(grid, 'V', ox, oy)
+draw_char(grid, 'S', ox, oy)
 draw_char(grid, 'S', ox + char_w + gap, oy)
+draw_char(grid, 'V', ox + (char_w + gap) * 2, oy)
 
 # try to find cycle (run up to 600 steps)
 g = grid.copy()

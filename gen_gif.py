@@ -83,9 +83,9 @@ ox = (GRID_W - total_w) // 2
 oy = (GRID_H - char_h) // 2
 
 grid = np.zeros((GRID_H, GRID_W), dtype=np.uint8)
-draw_char(grid, 'S', ox, oy)
-draw_char(grid, 'S', ox + char_w + gap, oy)
-draw_char(grid, 'V', ox + (char_w + gap) * 2, oy)
+draw_char(grid, 'V', ox, oy)
+draw_char(grid, 'V', ox + char_w + gap, oy)
+draw_char(grid, 'S', ox + (char_w + gap) * 2, oy)
 
 # try to find cycle (run up to 600 steps)
 g = grid.copy()
